@@ -44,7 +44,9 @@ include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_busc
 workflow NFCORE_BUSCO {
 
     take:
-    fasta // channel: fasta
+    fasta                   // channel: fasta
+    lineage_tax_ids        // channel: /path/to/lineage_tax_ids
+    lineage_db             // channel: /path/to/buscoDB
 
     main:
 
@@ -52,7 +54,9 @@ workflow NFCORE_BUSCO {
     // WORKFLOW: Run pipeline
     //
     BUSCO (
-        fasta
+        fasta,
+        lineage_tax_ids,
+        lineage_db
     )
 
     // emit:
@@ -85,7 +89,9 @@ workflow {
     // WORKFLOW: Run main workflow
     //
     NFCORE_BUSCO (
-        PIPELINE_INITIALISATION.out.fasta
+        PIPELINE_INITIALISATION.out.fasta,
+        PIPELINE_INITIALISATION.out.lineage_tax_ids,
+        PIPELINE_INITIALISATION.out.lineage_db
     )
 
     //

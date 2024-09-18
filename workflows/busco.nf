@@ -11,6 +11,10 @@ include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pi
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_busco_pipeline'
 
+include { NCBIDATASETS_SUMMARYGENOME as SUMMARYGENOME   } from '../modules/local/ncbidatasets/summarygenome'
+include { NCBIDATASETS_SUMMARYGENOME as SUMMARYSEQUENCE } from '../modules/local/ncbidatasets/summarygenome'
+include { NCBI_GET_ODB                                  } from '../modules/local/ncbidatasets/get_odb'
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -21,6 +25,8 @@ workflow BUSCO {
 
     take:
     ch_fasta // channel: [meta, path/to/fasta]
+    lineage_tax_ids        // channel: /path/to/lineage_tax_ids
+    lineage_db             // channel: /path/to/buscoDB
 
     main:
 
@@ -30,6 +36,27 @@ workflow BUSCO {
     ch_fasta.view()
 
 
+    // Genome summary statistics
+    SUMMARYGENOME ( ch_fasta )
+    ch_versions = ch_versions.mix ( SUMMARYGENOME.out.versions.first() )
+
+
+    // Sequence summary statistics
+    SUMMARYSEQUENCE ( ch_fasta )
+    ch_versions = ch_versions.mix ( SUMMARYSEQUENCE.out.versions.first() )
+
+
+    // Get ODB lineage value
+    NCBI_GET_ODB ( SUMMARYGENOME.out.summary, lineage_tax_ids )
+    ch_versions = ch_versions.mix ( NCBI_GET_ODB.out.versions.first() )
+
+
+    // Format inputs
+    NCBI_GET_ODB.out.csv
+    | map { meta, csv -> csv }
+    | splitCsv()
+    | map { row -> row[1] }
+    | set { ch_lineage }
 
 
 

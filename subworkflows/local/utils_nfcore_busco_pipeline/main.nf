@@ -99,9 +99,15 @@ workflow PIPELINE_INITIALISATION {
     | set { ch_fasta }
 
 
+    // Set up other channels
+    if (params.lineage_tax_ids) { ch_lineage_tax_ids = Channel.fromPath(params.lineage_tax_ids) } else { exit 1, 'Mapping BUSCO lineage <-> taxon_ids not specified' }
+    if (params.lineage_db) { ch_lineage_db = Channel.fromPath(params.lineage_db) } else { ch_lineage_db = Channel.empty() }
+
     emit:
-    fasta = ch_fasta
-    versions    = ch_versions
+    fasta               = ch_fasta
+    lineage_tax_ids     = ch_lineage_tax_ids
+    lineage_db          = ch_lineage_db
+    versions            = ch_versions
 }
 
 /*
