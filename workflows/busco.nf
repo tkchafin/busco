@@ -59,6 +59,7 @@ workflow BUSCO {
     | set { ch_lineage }
 
 
+    ch_lineage.view()
 
     // TODO: Not sure if we need MultiQC
     // ch_versions = ch_versions.mix(FASTQC.out.versions.first())
