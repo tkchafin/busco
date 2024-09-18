@@ -25,4 +25,11 @@ if __name__ == '__main__':
     parser.add_argument('-i', '--input', nargs =1, type=str)
     parser.add_argument('-o', '--output', nargs =1, type=str)
 
-    run_bbtools()
+    args = parser.parse_args()
+
+    input_file = args.input[0]
+    output_file = args.input[0]
+
+    print(f"Running run_bbtools.py with input {input_file} and output {output_file}")
+
+    #run_bbtools()

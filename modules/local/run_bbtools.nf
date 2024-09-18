@@ -1,5 +1,4 @@
-process runBBtools {
-    container = ?
+process BBTOOLS {
 
     input:
     path input_file 
