@@ -14,6 +14,7 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_busc
 include { NCBIDATASETS_SUMMARYGENOME as SUMMARYGENOME   } from '../modules/local/ncbidatasets/summarygenome'
 include { NCBIDATASETS_SUMMARYGENOME as SUMMARYSEQUENCE } from '../modules/local/ncbidatasets/summarygenome'
 include { NCBI_GET_ODB                                  } from '../modules/local/ncbidatasets/get_odb'
+include { BUSCO_DOWNLOAD                                } from '../modules/local/busco_download'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -60,6 +61,9 @@ workflow BUSCO {
 
 
     ch_lineage.view()
+
+    // Download ODB if not already provided
+    ch_odb = BUSCO_DOWNLOAD( ch_lineage ).busco_dir.ifEmpty( lineage_db )
 
     // TODO: Not sure if we need MultiQC
     // ch_versions = ch_versions.mix(FASTQC.out.versions.first())
