@@ -21,7 +21,7 @@ include { BUSCO  } from './workflows/busco'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_busco_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_busco_pipeline'
 
-include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_busco_pipeline'
+//include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_busco_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -55,8 +55,8 @@ workflow NFCORE_BUSCO {
         fasta
     )
 
-    emit:
-    multiqc_report = BUSCO.out.multiqc_report // channel: /path/to/multiqc_report.html
+    // emit:
+    // multiqc_report = BUSCO.out.multiqc_report // channel: /path/to/multiqc_report.html
 
 }
 /*
@@ -85,7 +85,7 @@ workflow {
     // WORKFLOW: Run main workflow
     //
     NFCORE_BUSCO (
-        PIPELINE_INITIALISATION.out.samplesheet
+        PIPELINE_INITIALISATION.out.fasta
     )
 
     //
@@ -97,8 +97,7 @@ workflow {
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        params.hook_url,
-        NFCORE_BUSCO.out.multiqc_report
+        params.hook_url
     )
 }
 
