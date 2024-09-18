@@ -280,5 +280,19 @@
         {
             "$ref": "#/definitions/generic_options"
         }
-    ]
+    ],
+    "properties": {
+        "assembly": {
+            "type": "string"
+        },
+        "species": {
+            "type": "string"
+        },
+        "taxon_id": {
+            "type": "string"
+        },
+        "bioproject": {
+            "type": "string"
+        }
+    }
 }

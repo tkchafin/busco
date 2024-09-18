@@ -29,10 +29,8 @@ include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_busc
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// TODO nf-core: Remove this line if you don't need a FASTA file
-//   This is an example of how to use getGenomeAttribute() to fetch parameters
-//   from igenomes.config using `--genome`
-params.fasta = getGenomeAttribute('fasta')
+// TODO Look into whether or not we want to use this
+//params.fasta = getGenomeAttribute('fasta')
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -46,7 +44,7 @@ params.fasta = getGenomeAttribute('fasta')
 workflow NFCORE_BUSCO {
 
     take:
-    samplesheet // channel: samplesheet read in from --input
+    fasta // channel: fasta
 
     main:
 
@@ -54,7 +52,7 @@ workflow NFCORE_BUSCO {
     // WORKFLOW: Run pipeline
     //
     BUSCO (
-        samplesheet
+        fasta
     )
 
     emit:
@@ -80,8 +78,7 @@ workflow {
         params.validate_params,
         params.monochrome_logs,
         args,
-        params.outdir,
-        params.input
+        params.outdir
     )
 
     //

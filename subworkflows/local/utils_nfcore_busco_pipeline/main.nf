@@ -81,27 +81,27 @@ workflow PIPELINE_INITIALISATION {
     // Create channel from input file provided through params.input
     //
     Channel
-        .fromSamplesheet("input")
-        .map {
-            meta, fastq_1, fastq_2 ->
-                if (!fastq_2) {
-                    return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
-                } else {
-                    return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ] ]
-                }
-        }
-        .groupTuple()
-        .map {
-            validateInputSamplesheet(it)
-        }
-        .map {
-            meta, fastqs ->
-                return [ meta, fastqs.flatten() ]
-        }
-        .set { ch_samplesheet }
+        .fromPath(params.input)
+        .set { ch_fasta }
+
+    ch_fasta
+    | map { file -> [ [ 'id': file.baseName ], file ] }
+    | set { ch_genome }
+
+    if ( params.fasta.endsWith('.gz') ) {
+        ch_unzipped = GUNZIP ( ch_genome ).gunzip
+        ch_versions = ch_versions.mix ( GUNZIP.out.versions.first() )
+    } else {
+        ch_unzipped = ch_genome
+    }
+
+    ch_unzipped
+    | map { meta, fa -> [ meta + [id: fa.baseName, genome_size: fa.size()], fa] }
+    | set { ch_fasta }
+
 
     emit:
-    samplesheet = ch_samplesheet
+    fasta = ch_fasta
     versions    = ch_versions
 }
 
@@ -174,29 +174,29 @@ def validateInputSamplesheet(input) {
 }
 //
 // Get attribute from genome config file e.g. fasta
-//
-def getGenomeAttribute(attribute) {
-    if (params.genomes && params.genome && params.genomes.containsKey(params.genome)) {
-        if (params.genomes[ params.genome ].containsKey(attribute)) {
-            return params.genomes[ params.genome ][ attribute ]
-        }
-    }
-    return null
-}
+// //
+// def getGenomeAttribute(attribute) {
+//     if (params.genomes && params.genome && params.genomes.containsKey(params.genome)) {
+//         if (params.genomes[ params.genome ].containsKey(attribute)) {
+//             return params.genomes[ params.genome ][ attribute ]
+//         }
+//     }
+//     return null
+// }
 
 //
 // Exit pipeline if incorrect --genome key provided
 //
-def genomeExistsError() {
-    if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
-        def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-            "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
-            "  Currently, the available genome keys are:\n" +
-            "  ${params.genomes.keySet().join(", ")}\n" +
-            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-        error(error_string)
-    }
-}
+// def genomeExistsError() {
+//     if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
+//         def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+//             "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
+//             "  Currently, the available genome keys are:\n" +
+//             "  ${params.genomes.keySet().join(", ")}\n" +
+//             "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+//         error(error_string)
+//     }
+// }
 
 //
 // Generate methods description for MultiQC
