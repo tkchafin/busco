@@ -15,7 +15,8 @@ include { NCBIDATASETS_SUMMARYGENOME as SUMMARYGENOME   } from '../modules/local
 include { NCBIDATASETS_SUMMARYGENOME as SUMMARYSEQUENCE } from '../modules/local/ncbidatasets/summarygenome'
 include { NCBI_GET_ODB                                  } from '../modules/local/ncbidatasets/get_odb'
 include { BUSCO_DOWNLOAD                                } from '../modules/local/busco_download'
-include { BUSCO_MINIPROT                                } from '../modules/local/busco_miniprot'
+include { BUSCO_MINIPROT                                } from '../modules/local/busco/eukaryote_miniprot/miniprot'
+include { BUSCO_MINIPROT_HMMER                          } from '../modules/local/busco/eukaryote_miniprot/hmmer'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -68,8 +69,9 @@ workflow BUSCO {
     BUSCO_MINIPROT ( ch_fasta, ch_odb )
     ch_versions = ch_versions.mix ( BUSCO_MINIPROT.out.versions.first() )
 
-
     // Run HMMER
+    BUSCO_MINIPROT_HMMER ( ch_fasta, ch_odb, BUSCO_MINIPROT.out.miniprot_output )
+    ch_versions = ch_versions.mix ( BUSCO_MINIPROT.out.versions.first() )
 
     // TODO: Not sure if we need MultiQC
     // ch_versions = ch_versions.mix(FASTQC.out.versions.first())

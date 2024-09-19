@@ -31,6 +31,10 @@ from busco.BuscoRunner import SingleRunner
 from busco.ConfigManager import BuscoConfigManager
 from busco.busco_tools.base import NoRerunFile, NoGenesError
 
+#########################################################################
+### Run BUSCO GenomeAnalysisEukaryotesMiniprot in miniprot-only mode ####
+#########################################################################
+
 def main(args):
 
     # Build a config object
