@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import argparse
 import sys
@@ -61,12 +61,13 @@ def config_builder(args):
         "in": args.fasta,
         "cpu": args.cpus,
         "lineage_dataset": args.lineage_db,
+        "download_path": "./",
         "domain": args.domain,
         "limit": None,
         "offline": True,
         "mode": "genome",
         "skip_bbtools": True,
-        "out": None,
+        "out": args.outdir,
         "force": True,
         "restart": False,
     }
@@ -77,15 +78,12 @@ def config_builder(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Description of your program")
-    parser.add_argument("-i", "--input", help="Input file")
-    parser.add_argument("-o", "--output", help="Output file")
-    # Add more arguments as needed
+    parser.add_argument("-f", "--fasta", help="FASTA file path", required=True)
+    parser.add_argument("-c", "--cpus", type=int, help="Number of CPUs to use", default=1)
+    parser.add_argument("-l", "--lineage_db", help="Lineage database path (e.g., busco_downloads/lineages/eukaryota_odb10)", required=True)
+    parser.add_argument("-d", "--domain", help="Domain (e.g., eukaryota)", required=False)
+    parser.add_argument("-o", "--outdir", help="Output directory", required=False)
 
     args = parser.parse_args()
-
-    args.fasta = "test_data/eukaryota/genome.fna"
-    args.cpus = 1
-    args.lineage_db = "busco_downloads/lineages/eukaryota_odb10"
-    args.domain = "eukaryota"
 
     main(args)

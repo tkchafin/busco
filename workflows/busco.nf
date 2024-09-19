@@ -15,6 +15,7 @@ include { NCBIDATASETS_SUMMARYGENOME as SUMMARYGENOME   } from '../modules/local
 include { NCBIDATASETS_SUMMARYGENOME as SUMMARYSEQUENCE } from '../modules/local/ncbidatasets/summarygenome'
 include { NCBI_GET_ODB                                  } from '../modules/local/ncbidatasets/get_odb'
 include { BUSCO_DOWNLOAD                                } from '../modules/local/busco_download'
+include { BUSCO_MINIPROT                                } from '../modules/local/busco_miniprot'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -33,8 +34,6 @@ workflow BUSCO {
 
     ch_versions = Channel.empty()
     //ch_multiqc_files = Channel.empty()
-
-    ch_fasta.view()
 
 
     // Genome summary statistics
@@ -60,10 +59,16 @@ workflow BUSCO {
     | set { ch_lineage }
 
 
-    ch_lineage.view()
-
     // Download ODB if not already provided
     ch_odb = BUSCO_DOWNLOAD( ch_lineage ).busco_dir.ifEmpty( lineage_db )
+
+
+    ch_fasta.view()
+    ch_odb.view()
+    // Run miniprot
+    BUSCO_MINIPROT ( ch_fasta, ch_odb )
+    ch_versions = ch_versions.mix ( BUSCO_MINIPROT.out.versions.first() )
+
 
     // TODO: Not sure if we need MultiQC
     // ch_versions = ch_versions.mix(FASTQC.out.versions.first())

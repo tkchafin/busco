@@ -11,7 +11,9 @@ process BUSCO_DOWNLOAD {
     val lineage                           // Required: odb name
 
     output:
-    path("busco_downloads/")                         , emit: busco_dir
+    path("busco_downloads/")                         , emit: download_path
+    path("busco_downloads/lineages/$lineage/")     , emit: busco_dir
+    path("busco_downloads/file_versions.tsv/")       , emit: file_versions
     path "versions.yml"                              , emit: versions
 
     when:
@@ -42,7 +44,7 @@ process BUSCO_DOWNLOAD {
 
     stub:
     """
-    mkdir -p busco-downloads
+    mkdir -p busco-downloads/lineages/{$lineage}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
