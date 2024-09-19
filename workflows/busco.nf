@@ -14,7 +14,6 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_busc
 include { NCBIDATASETS_SUMMARYGENOME as SUMMARYGENOME   } from '../modules/local/ncbidatasets/summarygenome'
 include { NCBIDATASETS_SUMMARYGENOME as SUMMARYSEQUENCE } from '../modules/local/ncbidatasets/summarygenome'
 include { NCBI_GET_ODB                                  } from '../modules/local/ncbidatasets/get_odb'
-include { BBTOOLS                                       } from '../modules/local/run_bbtools.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -61,9 +60,6 @@ workflow BUSCO {
 
 
     ch_lineage.view()
-
-    // BBTools for assembly analysis
-    BBTOOLS(ch_fasta[0],'output_path')
 
     // TODO: Not sure if we need MultiQC
     // ch_versions = ch_versions.mix(FASTQC.out.versions.first())

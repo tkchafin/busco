@@ -1,15 +1,13 @@
 process BBTOOLS {
 
     input:
-    path input_file 
-    path output_folder 
+    path input_path 
 
     output: 
-    path "${output_folder}/bbtools_output"
+    path "${params.output}/bbtools_output.txt"
 
     script:
     """
-    python bin/run_bbtools.py $input_file $output_folder
+    run_bbtools.py $input_path
     """
-
 }
