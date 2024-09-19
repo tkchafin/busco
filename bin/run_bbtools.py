@@ -1,75 +1,46 @@
-#!/usr/bin/env python3
-
-## run_bbtools.py - Python wrapper for BBToolsRunner (see https://gitlab.com/ezlab/busco/-/blob/master/src/busco/busco_tools/bbtools.py?ref_type=heads) 
-
-from busco.busco_tools.bbtools import BBToolsRunner
-from busco.BuscoRunner import SingleRunner
-from busco.BuscoConfig import BaseConfig
-from busco.AutoLineage import AutoSelectLineage
-
-from busco.ConfigManager import BuscoConfigManager
-
+import subprocess
 import argparse
 
-'''
-def run_bbtools(input_file:str, output_path:str):
+def parse_output(stats_output):
+        '''Taken from the BUSCO BBTools module (https://gitlab.com/ezlab/busco/-/blob/master/src/busco/busco_tools/bbtools.py?ref_type=heads)'''
 
-    #Set configuration
-    config = BaseConfig()
-    config.set('busco_run','in',input_file)
-    config.set('busco_run','main_out', output_path)
-    
-    #Set lineage
-    #lineage = AutoSelectLineage()
+        stats_metrics = dict()
 
-    #Create runner object
-    BBToolsRunner.config = config
-    bbtools_runner = BBToolsRunner()
+        lines = stats_output.splitlines()
 
-    bbtools_runner.configure_runner()
-    bbtools_runner.run()
-    bbtools_runner.parse_output()
-'''
+        for line in lines:
+            if line.startswith("Main genome scaffold total:"):
+                stats_metrics["Number of scaffolds"] = line.split(":")[-1].strip()
+            elif line.startswith("Main genome contig total:"):
+                stats_metrics["Number of contigs"] = line.split(":")[-1].strip()
+            elif line.startswith("Main genome scaffold sequence total:"):
+                stats_metrics["Total length"] = line.split(":")[-1].strip()
+            elif line.startswith("Main genome contig sequence total:"):
+                stats_metrics["Percent gaps"] = (
+                    line.split("\t")[-1].strip().strip(" gap")
+                )
+            elif line.startswith("Main genome scaffold N/L50:"):
+                nl50 = line.split(":")[-1].strip().split("/")
+                if float(nl50[0].replace(' MB','')) < float(nl50[1].replace(' MB','')):  # The N50/L50 values are inverted. Add a condition so if this is
+                    # fixed in bbtools in future versions, it will still work.
+                    stats_metrics["Scaffold N50"] = nl50[1].strip()
+                else:
+                    stats_metrics["Scaffold N50"] = nl50[0].strip()
+            elif line.startswith("Main genome contig N/L50:"):
+                nl50 = line.split(":")[-1].strip().split("/")
+                if float(nl50[0].replace(' MB','')) < float(nl50[1].replace(' MB','')):
+                    stats_metrics["Contigs N50"] = nl50[1].strip()
+                else:
+                    stats_metrics["Contigs N50"] = nl50[0].strip()
 
-def main(args):
-    
-    config_manager = config_builder(args)
+        return stats_metrics
 
-    runner = run_builder(config_manager)
+def write_tsv(parsed_dict, output_file_name):
 
-    run(runner)
+    with open(f"{output_file_name}.tsv", mode = 'w') as f:
+        for key in parsed_dict.keys():
+            f.write(f"{key}\t{parsed_dict[key]}\n")
 
-def run(runner):
-    runner.run()
-    runner.parse_output()   
-
-def config_builder(args):
-    params = {
-        "in": args.fasta,
-        "cpu": args.cpus,
-        "lineage_dataset": args.lineage_db,
-        "domain": args.domain,
-        "limit": None,
-        #"offline": True,
-        "mode": "genome",
-        #"out": args.output[0],
-        "main_out": args.output[0],
-        "force": True,
-        "restart": False,
-    }
-    manager = BuscoConfigManager(params=params)
-    manager.load_busco_config_main()
-
-    return manager
-
-def run_builder(config_manager):
-    single_runner = SingleRunner(config_manager)
-
-    single_runner.get_lineage()
-
-    single_runner.runner = BBToolsRunner(single_runner.config)
-
-    return single_runner.runner
 
 
 if __name__ == '__main__':
@@ -77,16 +48,20 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-i', '--input', nargs =1, type=str, required=True, help = "Path to input file")
-    parser.add_argument('-o', '--output', nargs =1, type=str, required=True, help="Path to output file")
+    parser.add_argument('-o', '--output', nargs =1, type=str, required=True, help= "Path to output file")
 
     args = parser.parse_args()
+
+    input_file = str(args.input[0])
+    contig_break = 2
+
+    print(f"Running BBTools Stats with input file {input_file}")
     
-    args.fasta = args.input[0]
-    args.cpus = 1
-    args.lineage_db = "busco_downloads/lineages/eukaryota_odb10"
-    args.domain = "eukaryota"
+    cmd = ['stats.sh',input_file]
 
-    #input_file = args.input[0]
-    #output_path = args.output[0]
+    stats_output = subprocess.run(cmd, check = True, text = True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-    main(args)
+    stats_metrics = parse_output(stats_output.stdout)
+
+    write_tsv(stats_metrics,str(args.output[0]))
+
