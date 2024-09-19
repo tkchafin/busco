@@ -1,47 +1,59 @@
 #!/usr/bin/env python3
 
 import argparse
-import os
-import json
 import sys
-import requests
 
-from busco.analysis.GenomeAnalysis import GenomeAnalysisEukaryotesMiniprot
-from busco.BuscoRunner import AnalysisRunner
-from busco.BuscoRunner import SingleRunner
-from busco.BuscoConfig import BuscoConfigMain
-from busco.ConfigManager import BuscoConfigManager
+#########################################################################
+### Monkey patching GenomeAnalysisEukaryotesMiniprot to only run miniprot
+#########################################################################
 
-def main(args):
-    """
+from busco.analysis.GenomeAnalysis import GenomeAnalysis, GenomeAnalysisEukaryotesMiniprot
+
+class Patch_GenomeAnalysisEukaryotesMiniprot(GenomeAnalysisEukaryotesMiniprot):
+
+    def __init__(self):
+        super().__init__()
+
     def run_analysis(self):
-        super().run_analysis()
+        """This function calls all needed steps for running the analysis."""
+        GenomeAnalysis.run_analysis(self)
         incomplete_buscos = None
         try:
             self.run_miniprot(incomplete_buscos)
-            self.hmmer_runner.miniprot_pipeline = True
-            self.gene_details = self.miniprot_align_runner.gene_details
-        #     self.run_hmmer(
-        #         self.miniprot_align_runner.output_sequences, busco_ids=incomplete_buscos
-        #     )
-        # except NoRerunFile:
-        #     raise NoGenesError("Miniprot")
+        except NoRerunFile:
+            raise NoGenesError("Miniprot")
 
-        # self.hmmer_runner.write_buscos_to_file()
-        # self.write_gff_files()
-    """
+sys.modules['busco.analysis.GenomeAnalysis'].GenomeAnalysisEukaryotesMiniprot = Patch_GenomeAnalysisEukaryotesMiniprot
+
+# Import other busco classes
+from busco.BuscoRunner import AnalysisRunner
+from busco.BuscoRunner import SingleRunner
+from busco.ConfigManager import BuscoConfigManager
+from busco.busco_tools.base import NoRerunFile, NoGenesError
+
+def main(args):
+
     # Build a config object
     config_manager = config_builder(args)
-    print(config_manager.config_main)
 
     # Pass config to Runner object
-    runner = SingleRunner(config_manager)
-    runner.run()
-    # runner.run_analysis()
+    runner = run_builder(config_manager)
 
+    # Run the analysis
+    runner.analysis.run_analysis()
 
-def runner():
-    pass
+def run_builder(config_manager):
+    # Set up SingleRunner
+    run_wrapper = SingleRunner(config_manager)
+
+    # Complete local config
+    run_wrapper.get_lineage()
+
+    # Initialise AnalysisRunner
+    run_wrapper.runner = AnalysisRunner(run_wrapper.config)
+
+    return run_wrapper.runner
+
 
 def config_builder(args):
     params = {
@@ -53,34 +65,10 @@ def config_builder(args):
         "limit": None,
         "offline": True,
         "mode": "genome",
-        "out": None,
-        "use_augustus": False,
-        "augustus_parameters": None,
-        "augustus_species": None,
-        "auto-lineage": False,
-        "auto-lineage-euk": False,
-        "auto-lineage-prok": False,
-        "config_file": None,
-        "contig_break": None,
-        "datasets_version": None,
-        "download": "==SUPPRESS==",
-        "download_base_url": None,
-        "download_path": None,
-        "evalue": None,
-        "force": True,
-        "list_datasets": "==SUPPRESS==",
-        "long": False,
-        "use_metaeuk": False,
-        "metaeuk_parameters": None,
-        "metaeuk_rerun_parameters": None,
         "skip_bbtools": True,
-        "opt-out-run-stats": False,
-        "out_path": None,
-        "quiet": False,
+        "out": None,
+        "force": True,
         "restart": False,
-        "scaffold_composition": False,
-        "tar": False,
-        "version": "==SUPPRESS=="
     }
     manager = BuscoConfigManager(params=params)
     manager.load_busco_config_main()
