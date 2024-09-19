@@ -4,13 +4,14 @@ process BBTOOLS {
         'biocontainers/busco:5.7.1--pyhdfd78af_0' }"
     
     input:
-    path input_path 
+    path input_file 
+    path output_path
 
     output: 
-    path "${params.output}/bbtools_output.txt"
+    path "${output_path}/bbtools_output.txt"
 
     script:
     """
-    python3 ${PWD}/bin/run_bbtools.py -i $input_path
+    python3 ${PWD}/bin/run_bbtools.py -i $input_file -o $output_path
     """
 }
