@@ -70,6 +70,7 @@ def config_builder(args):
         "out": args.outdir,
         "force": True,
         "restart": False,
+        "tar": args.tar
     }
     manager = BuscoConfigManager(params=params)
     manager.load_busco_config_main()
@@ -82,6 +83,7 @@ if __name__ == "__main__":
     parser.add_argument("-c", "--cpus", type=int, help="Number of CPUs to use", default=1)
     parser.add_argument("-l", "--lineage_db", help="Lineage database path (e.g., busco_downloads/lineages/eukaryota_odb10)", required=True)
     parser.add_argument("-d", "--domain", help="Domain (e.g., eukaryota)", required=False)
+    parser.add_argument("--tar", action="store_true", help="Boolean to tar the output", default=False)
     parser.add_argument("-o", "--outdir", help="Output directory", required=False)
 
     args = parser.parse_args()

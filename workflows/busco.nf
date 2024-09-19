@@ -50,7 +50,6 @@ workflow BUSCO {
     NCBI_GET_ODB ( SUMMARYGENOME.out.summary, lineage_tax_ids )
     ch_versions = ch_versions.mix ( NCBI_GET_ODB.out.versions.first() )
 
-
     // Format inputs
     NCBI_GET_ODB.out.csv
     | map { meta, csv -> csv }
@@ -58,17 +57,19 @@ workflow BUSCO {
     | map { row -> row[1] }
     | set { ch_lineage }
 
-
     // Download ODB if not already provided
     ch_odb = BUSCO_DOWNLOAD( ch_lineage ).busco_dir.ifEmpty( lineage_db )
 
 
-    ch_fasta.view()
-    ch_odb.view()
+    // TODO: Branch here for the different gene predictor options
+    // These will eventually be subworkflows e.g., EUKARYOTE_MINIPROT, EUKARYOTE_AUGUSTUS, etc.
+
     // Run miniprot
     BUSCO_MINIPROT ( ch_fasta, ch_odb )
     ch_versions = ch_versions.mix ( BUSCO_MINIPROT.out.versions.first() )
 
+
+    // Run HMMER
 
     // TODO: Not sure if we need MultiQC
     // ch_versions = ch_versions.mix(FASTQC.out.versions.first())

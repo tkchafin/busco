@@ -29,7 +29,7 @@ process BUSCO_MINIPROT {
         -c $task.cpus \\
         -l "./"$lineage_db \\
         -o $prefix \\
-        -d ${params.domain}
+        -d ${params.domain} \\
         $args
 
     cat <<-END_VERSIONS > versions.yml
