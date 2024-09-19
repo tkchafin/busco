@@ -1,4 +1,4 @@
-#!/home/participant/miniforge-pypy3/bin python
+#!/usr/bin/env python3
 
 ## run_bbtools.py - Python wrapper for BBToolsRunner (see https://gitlab.com/ezlab/busco/-/blob/master/src/busco/busco_tools/bbtools.py?ref_type=heads) 
 
@@ -16,21 +16,21 @@ def run_bbtools(input_file:str):#, output_file:str):
     bbtools_runner.run()
     bbtools_runner.parse_output()
 
-    with open(output_file, 'w') as f:
-        print(bbtools_runner.metrics, file = f)
+    #with open(output_file, 'w') as f:
+    #    print(bbtools_runner.metrics, file = f)
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-i', '--input', nargs =1, type=str, required=True, help = "Path to input file")
-    parser.add_argument('-o', '--output', nargs =1, type=str, required=True, help="Path to output file")
+    #parser.add_argument('-o', '--output', nargs =1, type=str, required=True, help="Path to output file")
 
     args = parser.parse_args()
 
     input_file = args.input[0]
-    output_file = args.output[0]
+    #output_file = args.output[0]
 
-    print(f"Running run_bbtools.py with input {input_file} and output {output_file}")
+    print(f"Running run_bbtools.py with input {input_file}")# and output {output_file}")
 
     run_bbtools(input_file)
