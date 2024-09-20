@@ -21,14 +21,14 @@ def parse_output(stats_output):
                 )
             elif line.startswith("Main genome scaffold N/L50:"):
                 nl50 = line.split(":")[-1].strip().split("/")
-                if float(nl50[0].replace(' MB','')) < float(nl50[1].replace(' MB','')):  # The N50/L50 values are inverted. Add a condition so if this is
+                if int(nl50[0]) < int(nl50[1]):  # The N50/L50 values are inverted. Add a condition so if this is
                     # fixed in bbtools in future versions, it will still work.
                     stats_metrics["Scaffold N50"] = nl50[1].strip()
                 else:
                     stats_metrics["Scaffold N50"] = nl50[0].strip()
             elif line.startswith("Main genome contig N/L50:"):
                 nl50 = line.split(":")[-1].strip().split("/")
-                if float(nl50[0].replace(' MB','')) < float(nl50[1].replace(' MB','')):
+                if int(nl50[0]) < int(nl50[1]):
                     stats_metrics["Contigs N50"] = nl50[1].strip()
                 else:
                     stats_metrics["Contigs N50"] = nl50[0].strip()
@@ -53,11 +53,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     input_file = str(args.input[0])
-    contig_break = 2
+    contig_break = 10
 
     print(f"Running BBTools Stats with input file {input_file}")
     
-    cmd = ['stats.sh',input_file]
+    cmd = ['stats.sh',f'in={input_file}', f'format={2}']
 
     stats_output = subprocess.run(cmd, check = True, text = True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
