@@ -1,6 +1,6 @@
-process BUSCO_MINIPROT {
+process BUSCO_SUMMARY {
     tag "$meta.id"
-    label 'process_high'
+    label 'process_single'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -10,11 +10,9 @@ process BUSCO_MINIPROT {
     input:
     tuple val(meta), path(fasta)        // tuple: meta, fasta
     path(lineage_db)                    // /path/to/lineage_db
+    path(output_base)                   // /path/to/busco_results
 
     output:
-    path("${meta.id}/run_*/miniprot_output")         , emit: miniprot_output
-    path("${meta.id}/run_*")                         , emit: base_output
-    path("${meta.id}/logs")                          , emit: logs
     path "versions.yml"                              , emit: versions
 
     when:
@@ -25,7 +23,7 @@ process BUSCO_MINIPROT {
     def prefix = task.ext.prefix ?: "${meta.id}"
 
     """
-    busco_miniprot_wrapper.py \\
+    busco_summary_wrapper.py \\
         -f $fasta \\
         -c $task.cpus \\
         -l "./"$lineage_db \\
@@ -33,27 +31,17 @@ process BUSCO_MINIPROT {
         -d ${params.domain} \\
         $args
 
-    # Replace GFF symlink with real file
-    gff=\$(realpath ${prefix}/run_${lineage_db}/miniprot_output/*.gff)
-    target=\$(find GCA_011022315.1/run_saccharomycetes_odb10/miniprot_output -name "*.gff")
-    cp --remove-destination \$gff \$target
-
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         busco: \$( busco --version 2>&1 | sed 's/^BUSCO //' )
-        miniprot: \$( miniprot --version 2>&1  )
     END_VERSIONS
     """
 
     stub:
     """
-    mkdir -p ${meta.id}/run_stub/miniprot_output
-    mkdir -p ${meta.id}/logs
-
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         busco: \$( busco --version 2>&1 | sed 's/^BUSCO //' )
-        miniprot: \$( miniprot --version 2>&1  )
     END_VERSIONS
     """
 }

@@ -73,6 +73,7 @@ workflow BUSCO {
     BUSCO_MINIPROT_HMMER ( ch_fasta, ch_odb, BUSCO_MINIPROT.out.miniprot_output )
     ch_versions = ch_versions.mix ( BUSCO_MINIPROT.out.versions.first() )
 
+
     // TODO: Not sure if we need MultiQC
     // ch_versions = ch_versions.mix(FASTQC.out.versions.first())
 

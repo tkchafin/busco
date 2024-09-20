@@ -2,6 +2,7 @@
 
 import argparse
 import sys
+import os
 
 #############################################################################
 ### Monkey patch GenomeAnalysisEukaryotesMiniprot to only post-miniprot HMMER
@@ -40,12 +41,16 @@ class Patch_GenomeAnalysisEukaryotesMiniprot(GenomeAnalysisEukaryotesMiniprot):
 
 sys.modules['busco.analysis.GenomeAnalysis'].GenomeAnalysisEukaryotesMiniprot = Patch_GenomeAnalysisEukaryotesMiniprot
 
+def patch(src, dst, target_is_directory = False, *, dir_fd = None):
+    pass
+
+os.symlink = patch
+
 # Import other busco classes
 from busco.BuscoRunner import AnalysisRunner
 from busco.BuscoRunner import SingleRunner
 from busco.ConfigManager import BuscoConfigManager
 from busco.busco_tools.base import NoRerunFile, NoGenesError
-
 
 #########################################################################
 ### Run HMMER and BUSCO post-processing for BUSCO_MINIPROT ##############

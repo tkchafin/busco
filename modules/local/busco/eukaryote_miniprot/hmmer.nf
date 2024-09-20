@@ -14,11 +14,14 @@ process BUSCO_MINIPROT_HMMER {
 
     output:
     path("${meta.id}/run_*/miniprot_output")         , emit: miniprot_output
+    path("${meta.id}/run_*")                         , emit: base_output
     path("${meta.id}/logs")                          , emit: logs
     path("${meta.id}/run_*/full_table.tsv")          , emit: full_table
     path("${meta.id}/run_*/missing_busco_list.tsv")  , emit: missing_busco_list
     path("${meta.id}/run_*/hmmer_output")            , emit: hmmer_output
     path("${meta.id}/run_*/busco_sequences")         , emit: busco_sequences
+    path("${meta.id}/run_*/short_summary.txt")       , emit: short_summary_txt
+    path("${meta.id}/run_*/short_summary.json")      , emit: short_summary_json
     path "versions.yml"                              , emit: versions
 
     when:
