@@ -4,14 +4,12 @@ process BBTOOLS {
         'biocontainers/busco:5.7.1--pyhdfd78af_0' }"
     
     input:
-    path input_file 
-    path output_file
-
-    output: 
-    path "${output_file}.tsv"
+    tuple val(_), path(fasta_path) 
 
     script:
+    def output_file = "${fasta_path.toString().split('/')[-1].replaceFirst(/\.fasta$/,'')}_stats_output"
+    
     """
-    python3 ${PWD}/bin/run_bbtools.py -i $input_file -o $output_file
+    python3 ${PWD}/bin/run_bbtools.py -i ${fasta_path} -o ${output_file}
     """
 }

@@ -17,6 +17,7 @@ include { NCBI_GET_ODB                                  } from '../modules/local
 include { BUSCO_DOWNLOAD                                } from '../modules/local/busco_download'
 include { BUSCO_MINIPROT                                } from '../modules/local/busco/eukaryote_miniprot/miniprot'
 include { BUSCO_MINIPROT_HMMER                          } from '../modules/local/busco/eukaryote_miniprot/hmmer'
+include { BBTOOLS                                       } from '../modules/local/busco/bbtools'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -64,6 +65,9 @@ workflow BUSCO {
 
     // TODO: Branch here for the different gene predictor options
     // These will eventually be subworkflows e.g., EUKARYOTE_MINIPROT, EUKARYOTE_AUGUSTUS, etc.
+
+    // Run BBTools 
+    BBTOOLS ( ch_fasta )
 
     // Run miniprot
     BUSCO_MINIPROT ( ch_fasta, ch_odb )
