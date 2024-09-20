@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import subprocess
 import argparse
 
@@ -56,7 +58,7 @@ if __name__ == '__main__':
     contig_break = 10
 
     print(f"Running BBTools Stats with input file {input_file}")
-    
+
     cmd = ['stats.sh',f'in={input_file}', f'format={2}']
 
     stats_output = subprocess.run(cmd, check = True, text = True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
