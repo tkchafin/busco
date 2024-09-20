@@ -14,6 +14,9 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_busc
 include { NCBIDATASETS_SUMMARYGENOME as SUMMARYGENOME   } from '../modules/local/ncbidatasets/summarygenome'
 include { NCBIDATASETS_SUMMARYGENOME as SUMMARYSEQUENCE } from '../modules/local/ncbidatasets/summarygenome'
 include { NCBI_GET_ODB                                  } from '../modules/local/ncbidatasets/get_odb'
+include { BUSCO_DOWNLOAD                                } from '../modules/local/busco_download'
+include { BUSCO_MINIPROT                                } from '../modules/local/busco/eukaryote_miniprot/miniprot'
+include { BUSCO_MINIPROT_HMMER                          } from '../modules/local/busco/eukaryote_miniprot/hmmer'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -33,8 +36,6 @@ workflow BUSCO {
     ch_versions = Channel.empty()
     //ch_multiqc_files = Channel.empty()
 
-    ch_fasta.view()
-
 
     // Genome summary statistics
     SUMMARYGENOME ( ch_fasta )
@@ -50,7 +51,6 @@ workflow BUSCO {
     NCBI_GET_ODB ( SUMMARYGENOME.out.summary, lineage_tax_ids )
     ch_versions = ch_versions.mix ( NCBI_GET_ODB.out.versions.first() )
 
-
     // Format inputs
     NCBI_GET_ODB.out.csv
     | map { meta, csv -> csv }
@@ -58,8 +58,20 @@ workflow BUSCO {
     | map { row -> row[1] }
     | set { ch_lineage }
 
+    // Download ODB if not already provided
+    ch_odb = BUSCO_DOWNLOAD( ch_lineage ).busco_dir.ifEmpty( lineage_db )
 
-    ch_lineage.view()
+
+    // TODO: Branch here for the different gene predictor options
+    // These will eventually be subworkflows e.g., EUKARYOTE_MINIPROT, EUKARYOTE_AUGUSTUS, etc.
+
+    // Run miniprot
+    BUSCO_MINIPROT ( ch_fasta, ch_odb )
+    ch_versions = ch_versions.mix ( BUSCO_MINIPROT.out.versions.first() )
+
+    // Run HMMER
+    BUSCO_MINIPROT_HMMER ( ch_fasta, ch_odb, BUSCO_MINIPROT.out.miniprot_output )
+    ch_versions = ch_versions.mix ( BUSCO_MINIPROT.out.versions.first() )
 
     // TODO: Not sure if we need MultiQC
     // ch_versions = ch_versions.mix(FASTQC.out.versions.first())
