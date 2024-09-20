@@ -2,7 +2,9 @@
 work/
 data/
 results/
+busco_downloads/
 .DS_Store
 testing/
 testing*
+null/
 *.pyc
