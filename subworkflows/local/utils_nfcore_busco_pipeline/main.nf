@@ -93,6 +93,7 @@ workflow PIPELINE_INITIALISATION {
     } else {
         ch_unzipped = ch_genome
     }
+    
 
     ch_unzipped
     | map { meta, fa -> [ meta + [id: fa.baseName, genome_size: fa.size()], fa] }
