@@ -35,7 +35,7 @@ process BUSCO_MINIPROT {
 
     # Replace GFF symlink with real file
     gff=\$(realpath ${prefix}/run_${lineage_db}/miniprot_output/*.gff)
-    target=\$(find GCA_011022315.1/run_saccharomycetes_odb10/miniprot_output -name "*.gff")
+    target=\$(find GCA_011022315.1/run_${lineage_db}/miniprot_output -name "*.gff")
     cp --remove-destination \$gff \$target
 
     cat <<-END_VERSIONS > versions.yml
