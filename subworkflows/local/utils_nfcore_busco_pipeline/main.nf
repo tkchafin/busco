@@ -93,7 +93,6 @@ workflow PIPELINE_INITIALISATION {
     } else {
         ch_unzipped = ch_genome
     }
-    
 
     ch_unzipped
     | map { meta, fa -> [ meta + [id: fa.baseName, genome_size: fa.size()], fa] }
@@ -101,7 +100,7 @@ workflow PIPELINE_INITIALISATION {
 
 
     // Set up other channels
-    if (params.lineage_tax_ids) { ch_lineage_tax_ids = Channel.fromPath(params.lineage_tax_ids) } else { exit 1, 'Mapping BUSCO lineage <-> taxon_ids not specified' }
+    if (params.lineage_tax_ids) { ch_lineage_tax_ids = Channel.fromPath(params.lineage_tax_ids) } else { exit 1, "Mapping BUSCO lineage <-> taxon_ids not specified"" }
     if (params.lineage_db) { ch_lineage_db = Channel.fromPath(params.lineage_db) } else { ch_lineage_db = Channel.empty() }
 
     emit:
@@ -109,7 +108,7 @@ workflow PIPELINE_INITIALISATION {
     lineage_tax_ids     = ch_lineage_tax_ids
     lineage_db          = ch_lineage_db
     versions            = ch_versions
-}
+
 
 /*
 ========================================================================================
@@ -151,44 +150,59 @@ workflow PIPELINE_COMPLETION {
     }
 }
 
+worflow BUSCO_EUKARYOTE.nf {
+
+    take:
+
+    main:   
+
+    emit:        
+}
+
+
+worflow BUSCO_EUKARYOTE.nf {
+
+    take:
+
+    main:   
+
+    emit:        
+}
+
 /*
 ========================================================================================
     FUNCTIONS
 ========================================================================================
 */
-//
-// Check and validate pipeline parameters
-//
-def validateInputParameters() {
 
+// Check and validate pipeline parameters
+// def validateInputParameters() {
+
+// }
+
+
+// Get attribute from genome config file e.g. fasta
+
+def getGenomeAttribute(attribute) {
+    if (params.genomes && params.genome && params.genomes.containsKey(params.genome)) {
+        if (params.genomes[ params.genome ].containsKey(attribute)) {
+            return params.genomes[ params.genome ][ attribute ]
+        }
+    }     return null
 }
 
-
-//
-// Get attribute from genome config file e.g. fasta
-// //
-// def getGenomeAttribute(attribute) {
-//     if (params.genomes && params.genome && params.genomes.containsKey(params.genome)) {
-//         if (params.genomes[ params.genome ].containsKey(attribute)) {
-//             return params.genomes[ params.genome ][ attribute ]
-//         }
-//     }
-//     return null
-// }
-
-//
 // Exit pipeline if incorrect --genome key provided
-//
-// def genomeExistsError() {
-//     if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
-//         def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-//             "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
-//             "  Currently, the available genome keys are:\n" +
-//             "  ${params.genomes.keySet().join(", ")}\n" +
-//             "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-//         error(error_string)
-//     }
-// }
+
+def genomeExistsError() {
+    if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
+        def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
+            "  Currently, the available genome keys are:\n" +
+            "  ${params.genomes.keySet().join(", ")}\n" +
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        error(error_string)
+    }
+}
 
 //
 // Generate methods description for MultiQC
